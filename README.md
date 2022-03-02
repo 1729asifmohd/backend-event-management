@@ -1,6 +1,6 @@
 # backend-event-management
 
-``bash
+```bash
  npm i 
  npm run dev
  
