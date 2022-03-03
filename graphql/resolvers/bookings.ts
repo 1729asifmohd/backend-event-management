@@ -1,23 +1,22 @@
-const Event = require('../../models/events');
-const User = require('../../models/users')
-const Booking= require('../../models/bookings');
+import Event, { IEvent } from '../../models/events';
+import User from '../../models/users';
+import Booking, { IBookings } from '../../models/bookings';
 
-
-const event_booking=async (eventId)=>{
+const event_booking=async (eventId:any):Promise<any>=>{
     console.log(eventId);
     const event= await Event.findById(eventId);
     console.log(event)
     return {
-        ...event._doc,
+        ...event,
         _id:event.id,
         creator:user_util.bind(this,event.creator)
     } 
 }
 
-const event_util = eventIds => {
+const event_util =(eventIds:any):any=> {
     return Event.find({ _id: { $in: eventIds } })
-        .then((result) => {
-            return result.map((res) => {
+        .then((result:any):any => {
+            return result.map((res:any):any => {
 
                 return {
                     ...res._doc,
@@ -26,35 +25,35 @@ const event_util = eventIds => {
                 }
             })
         })
-        .catch((err) => {
+        .catch((err:Error):any => {
             throw new Error("not found")
         })
 }
 
 //adding user_util
-const user_util = userId => {
-    return User.findById(userId).then((res) => {
+const user_util = (userId:any):any => {
+    return User.findById(userId).then((res:any) => {
         return {
             ...res._doc,
             id: res.id,
             createdEvents: event_util.bind(this, res._doc.createdEvents)
         }
-    }).catch(err => {
+    }).catch((err:Error):any => {
         throw err
     })
 }
 
 
-module.exports=({
+export default {
     
-    bookings:async (args,req)=>{
+    bookings:async (args:any,req:any):Promise<any>=>{
         if(!req.isAuth){
             throw new Error('Unauthenticated')
         }
         try{
             const bookings=await Booking.find();
 
-            return bookings.map(booking=>{
+            return bookings.map((booking:any):any=>{
                 return {
                     ...booking._doc,
                     id:booking.id,
@@ -69,36 +68,28 @@ module.exports=({
         }
     },
    
-    createBooking: async (args,req) => {
-        if(!req.isAuth){
-            throw new Error('Unauthenticated')
-        }
+    createBooking: async (args:any,req:any):Promise<any> => {
+        // if(!req.isAuth){
+        //     throw new Error('Unauthenticated')
+        // }
         try {
-            const fetchedEvent=await Event.findOne({_id:args.eventId});
+            const fetchedEvent:IEvent=await Event.findOne({_id:args.eventId});
             console.log(fetchedEvent); 
             
-            const booking = new Booking({
+            const booking:IBookings = new Booking({
                 user: req.userId,
                 events: fetchedEvent,
                 // createdAt: new Date().toISOString(),
                 // UpdatedAt: new Date().toISOString()
             })
-            const result=await booking.save();
-            return {
-                ...result._doc,
-                id:result.id,
-                user:user_util.bind(this,result._doc.user),
-                events:event_booking.bind(this,result._doc.events),
-                createdAt:new Date(result._doc.createdAt).toISOString(),
-                updatedAt:new Date(result._doc.createdAt).toISOString()
-
-            };
+            const result:IBookings=await booking.save();
+            return result
         }
         catch (err) {
             throw err;
         }
     },
-    cancelBooking:async (args,req)=>{
+    cancelBooking:async (args:any,req:any):Promise<any>=>{
         if(!req.isAuth){
             throw new Error('Unauthenticated')
         }
@@ -118,4 +109,4 @@ module.exports=({
     }
 
 
-})
+}

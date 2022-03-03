@@ -1,15 +1,14 @@
-const Event = require('../../models/events');
-const User = require('../../models/users')
-const date_util=require('../../helper/date')
+import { date_util } from "../../helper/date";
+import User, { IUser } from "../../models/users";
+import Event, { IEvent }  from "../../models/events";
 
-
-const event_util = eventIds => {
+const event_util = (eventIds:any):any => {
     return Event.find({ _id: { $in: eventIds } })
-        .then((result) => {
-            return result.map((res) => {
+        .then((result:any):any => {
+            return result.map((res:any):any => {
 
                 return {
-                    ...res._doc,
+                    ...res,
                     id: res.id,
                     creator: user_util.bind(this, res.creator)
                 }
@@ -21,28 +20,28 @@ const event_util = eventIds => {
 }
 
 //adding user_util
-const user_util = userId => {
+const user_util = (userId:any):any => {
     return User.findById(userId).then((res) => {
         return {
-            ...res._doc,
+            ...res,
             id: res.id,
-            createdEvents: event_util.bind(this, res._doc.createdEvents)
+            createdEvents: event_util.bind(this, res.createdEvents)
         }
     }).catch(err => {
         throw err
     })
 }
 
-module.exports=({
+export default {
     events: () => {
         return Event.find()
             .then((result) => {
                 return result.map((res) => {
 
                     return {
-                        ...res._doc,
+                        ...res,
                         id: res.id,
-                        creator: user_util.bind(this, res._doc.creator)
+                        creator: user_util.bind(this, res.creator)
                     }
                 })
             })
@@ -51,35 +50,36 @@ module.exports=({
             })
     },
    
-    createEvent: (args,req) => {
-        if(!req.isAuth){
-            throw new Error('Unauthenticated')
-        }
+    createEvent: (args:any,req:any):any => {
+        // if(!req.isAuth){
+        //     throw new Error('Unauthenticated')
+        // }
+        console.log(args);
     
-        const event = new Event({
+        const event:IEvent = new Event({
             title: args.eventInput.title,
             description: args.eventInput.description,
             price: args.eventInput.price,
             date: new Date(args.eventInput.date).toISOString(),
-            creator: req.userId
+            creator: "6217e8376028005e726650f3"
         })
-        let createdEvent;
+        let createdEvent:any;
         return event.save()
-            .then((result) => {
+            .then((result:IEvent):any => {
                 console.log("data has been saved");
-                createdEvent = { ...result._doc, id: result.id }
-                return User.findById(req.userId)
-            }).then(result => {
+                createdEvent = { ...result, id: result.id }
+                return User.findById("6217e8376028005e726650f3")
+            }).then((result:any):any => {
                 if (!result) {
                     throw new Error('User Does not Exist')
                 }
                 result.createdEvents.push(event);
                 return result.save()
-            }).then(result => {
+            }).then((result:any):any => {
                 return createdEvent
             })
             .catch((err) => {
                 throw err
             })
     },
-})
+}

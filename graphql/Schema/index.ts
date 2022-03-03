@@ -1,6 +1,6 @@
-const { buildSchema } = require('graphql');
+import { buildSchema } from 'graphql';
 
-module.exports = buildSchema(`
+export default buildSchema(`
 
 type Booking{
     _id:ID!
@@ -10,7 +10,6 @@ type Booking{
     UpdatedAt:String!
 }
 
-
 type Event{
      id:String!
      title:String!
@@ -18,6 +17,13 @@ type Event{
      description:String!
      date:String!
      creator:User
+   }
+
+type Profile{
+    _id:ID!
+    name:String!
+    occupation:String!
+    createdEvents:[Event!]
    }
 
 type AuthData{
@@ -36,6 +42,12 @@ input UserInput{
     password:String!
   }
 
+input ProfileInput{
+    name:String!
+    occupation:String!
+    createdEvents:ID!
+}
+
 input EventInput{
     title:String!
     description:String!
@@ -43,10 +55,11 @@ input EventInput{
     date:String!
 }
 
-    type RootQuery{
+type RootQuery{
         events:[Event!]!
         bookings:[Booking!]!
         login(email:String!,password:String!):AuthData!
+        getprofile(userId:ID!):Profile!
     }
 
     type RootMutation{
@@ -54,9 +67,11 @@ input EventInput{
         createUser(userInput:UserInput):User
         createBooking(eventId:ID!):Booking!
         cancelBooking(bookingId:ID!):Event!
+        createProfile(profileInput:ProfileInput):Profile!
     }
     schema{
         query:RootQuery
         mutation:RootMutation
     }
+
 `)
